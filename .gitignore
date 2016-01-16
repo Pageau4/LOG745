@@ -1,0 +1,6 @@
+.classpath
+*.project
+AlignedBox3D.class
+jogl.jar
+*.jar
+*.class
