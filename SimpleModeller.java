@@ -1,5 +1,6 @@
 
 import java.lang.Math;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import java.awt.Container;
@@ -12,9 +13,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
+import java.awt.Color;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -22,6 +26,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.BoxLayout;
 
 import javax.media.opengl.GL;
@@ -158,6 +164,34 @@ class Scene {
 			ColoredBox cb = coloredBoxes.elementAt(index);
 			cb.r = r;
 			cb.g = g;
+			cb.b = b;
+		}
+	}
+	
+	public void setAlphaOfBox( int index, float a ) {
+		if ( 0 <= index && index < coloredBoxes.size() ) {
+			ColoredBox cb = coloredBoxes.elementAt(index);
+			cb.a = a;
+		}
+	}
+	
+	public void setRedOfBox( int index, float r ) {
+		if ( 0 <= index && index < coloredBoxes.size() ) {
+			ColoredBox cb = coloredBoxes.elementAt(index);
+			cb.r = r;
+		}
+	}
+	
+	public void setGreenOfBox( int index, float g ) {
+		if ( 0 <= index && index < coloredBoxes.size() ) {
+			ColoredBox cb = coloredBoxes.elementAt(index);
+			cb.g = g;
+		}
+	}
+	
+	public void setBlueOfBox( int index, float b ) {
+		if ( 0 <= index && index < coloredBoxes.size() ) {
+			ColoredBox cb = coloredBoxes.elementAt(index);
 			cb.b = b;
 		}
 	}
@@ -451,6 +485,30 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	public void setColorOfSelection( float r, float g, float b ) {
 		if ( indexOfSelectedBox >= 0 ) {
 			scene.setColorOfBox( indexOfSelectedBox, r, g, b );
+		}
+	}
+	
+	public void setAlphaOfSelection( float a ) {
+		if ( indexOfSelectedBox >= 0 ) {
+			scene.setAlphaOfBox( indexOfSelectedBox, a );
+		}
+	}
+	
+	public void setRedOfSelection( float r ) {
+		if ( indexOfSelectedBox >= 0 ) {
+			scene.setRedOfBox( indexOfSelectedBox, r );
+		}
+	}
+	
+	public void setGreenOfSelection( float g ) {
+		if ( indexOfSelectedBox >= 0 ) {
+			scene.setGreenOfBox( indexOfSelectedBox, g );
+		}
+	}
+	
+	public void setBlueOfSelection( float b ) {
+		if ( indexOfSelectedBox >= 0 ) {
+			scene.setBlueOfBox( indexOfSelectedBox, b );
 		}
 	}
 
@@ -750,9 +808,13 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	}
 }
 
-public class SimpleModeller implements ActionListener {
+public class SimpleModeller implements ActionListener, ChangeListener {
 
 	static final String applicationName = "Simple Modeller";
+	
+	// Alpha settings
+	static final int ALPHA_MIN = 0;
+	static final int ALPHA_MAX = 100;
 
 	JFrame frame;
 	Container toolPanel;
@@ -767,6 +829,18 @@ public class SimpleModeller implements ActionListener {
 	JCheckBox displayCameraTargetCheckBox;
 	JCheckBox displayBoundingBoxCheckBox;
 	JCheckBox enableCompositingCheckBox;
+	
+	JSlider alphaSlider = new JSlider(JSlider.HORIZONTAL,
+			ALPHA_MIN, ALPHA_MAX, ALPHA_MAX);
+	
+	JSlider redSlider = new JSlider(JSlider.HORIZONTAL,
+			ALPHA_MIN, ALPHA_MAX, ALPHA_MIN);
+	
+	JSlider greenSlider = new JSlider(JSlider.HORIZONTAL,
+			ALPHA_MIN, ALPHA_MAX, ALPHA_MIN);
+	
+	JSlider blueSlider = new JSlider(JSlider.HORIZONTAL,
+			ALPHA_MIN, ALPHA_MAX, ALPHA_MIN);
 
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
@@ -931,6 +1005,46 @@ public class SimpleModeller implements ActionListener {
 		enableCompositingCheckBox.setAlignmentX( Component.LEFT_ALIGNMENT );
 		enableCompositingCheckBox.addActionListener(this);
 		toolPanel.add( enableCompositingCheckBox );
+		
+		alphaSlider.setAlignmentX( Component.LEFT_ALIGNMENT );
+		alphaSlider.addChangeListener(this);
+		Hashtable alphaSliderLabelTable = new Hashtable();
+		alphaSliderLabelTable.put( new Integer( 0 ), new JLabel("Transparent") );
+		alphaSliderLabelTable.put( new Integer( ALPHA_MAX ), new JLabel("Opaque") );
+		alphaSlider.setLabelTable( alphaSliderLabelTable );
+
+		alphaSlider.setPaintLabels(true);
+		toolPanel.add( alphaSlider );
+		
+		redSlider.setAlignmentX( Component.LEFT_ALIGNMENT );
+		redSlider.addChangeListener(this);
+		Hashtable redSliderLabelTable = new Hashtable();
+		redSliderLabelTable.put( new Integer( 0 ), new JLabel("0") );
+		redSliderLabelTable.put( new Integer( ALPHA_MAX ), new JLabel("255") );
+		redSlider.setLabelTable( redSliderLabelTable );
+
+		redSlider.setPaintLabels(true);
+		toolPanel.add( redSlider );
+		
+		greenSlider.setAlignmentX( Component.LEFT_ALIGNMENT );
+		greenSlider.addChangeListener(this);
+		Hashtable greenSliderLabelTable = new Hashtable();
+		greenSliderLabelTable.put( new Integer( 0 ), new JLabel("0") );
+		greenSliderLabelTable.put( new Integer( ALPHA_MAX ), new JLabel("255") );
+		greenSlider.setLabelTable( greenSliderLabelTable );
+
+		greenSlider.setPaintLabels(true);
+		toolPanel.add( greenSlider );
+		
+		blueSlider.setAlignmentX( Component.LEFT_ALIGNMENT );
+		blueSlider.addChangeListener(this);
+		Hashtable blueSliderLabelTable = new Hashtable();
+		blueSliderLabelTable.put( new Integer( 0 ), new JLabel("0") );
+		blueSliderLabelTable.put( new Integer( ALPHA_MAX ), new JLabel("255") );
+		blueSlider.setLabelTable( blueSliderLabelTable );
+
+		blueSlider.setPaintLabels(true);
+		toolPanel.add( blueSlider );
 
 		frame.pack();
 		frame.setVisible( true );
@@ -946,6 +1060,26 @@ public class SimpleModeller implements ActionListener {
 				}
 			}
 		);
+	}
+
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		JSlider source = (JSlider)e.getSource();
+		float slider_value = (int)source.getValue()/100.0f;
+		if(source == alphaSlider){
+			sceneViewer.setAlphaOfSelection(slider_value);
+		}
+		else if ( source == redSlider ) {
+			sceneViewer.setRedOfSelection(slider_value);
+		}
+		else if ( source == greenSlider ) {
+			sceneViewer.setGreenOfSelection(slider_value);
+		}
+		else if ( source == blueSlider ) {
+			sceneViewer.setBlueOfSelection(slider_value);
+		}
+        sceneViewer.repaint();
 	}
 }
 
