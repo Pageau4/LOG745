@@ -2,11 +2,9 @@
 import java.lang.Math;
 import java.util.Hashtable;
 import java.util.Vector;
-
 import java.awt.Container;
 import java.awt.Component;
 import java.awt.Dimension;
-
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent;
@@ -18,6 +16,7 @@ import java.awt.Color;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -29,7 +28,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.BoxLayout;
-
 import javax.media.opengl.GL;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
@@ -73,8 +71,6 @@ class Scene {
 
 	AlignedBox3D boundingBoxOfScene = new AlignedBox3D();
 	boolean isBoundingBoxOfSceneDirty = false;
-
-
 
 
 	public Scene() {
@@ -328,7 +324,8 @@ class Scene {
 	public void drawScene(
 		GL gl,
 		int indexOfHilitedBox, // -1 for none
-		boolean useAlphaBlending
+		boolean useAlphaBlending,
+		boolean wireFrameValue
 	) {
 		if ( useAlphaBlending ) {
 			gl.glDisable(GL.GL_DEPTH_TEST);
@@ -358,7 +355,7 @@ class Scene {
 			else if ( indexOfHilitedBox == i )
 				gl.glColor3f( 0, 1, 0 );
 			else continue;
-			drawBox( gl, cb.box, true, true, true );
+			drawBox( gl, cb.box, true, wireFrameValue, true );
 		}
 	}
 
@@ -398,8 +395,11 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	public boolean displayCameraTarget = false;
 	public boolean displayBoundingBox = false;
 	public boolean enableCompositing = false;
+	public boolean enableWireFrame = true;
 
 	int mouse_x, mouse_y, old_mouse_x, old_mouse_y;
+	
+	
 
 	public SceneViewer( GLCapabilities caps ) {
 
@@ -580,7 +580,7 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 		gl.glDisable( GL.GL_LIGHTING );
 		gl.glShadeModel( GL.GL_FLAT );
 
-		scene.drawScene( gl, indexOfHilitedBox, enableCompositing );
+		scene.drawScene( gl, indexOfHilitedBox, enableCompositing, enableWireFrame );
 
 		if ( displayWorldAxes ) {
 			gl.glBegin( GL.GL_LINES );
@@ -829,16 +829,14 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 	JCheckBox displayCameraTargetCheckBox;
 	JCheckBox displayBoundingBoxCheckBox;
 	JCheckBox enableCompositingCheckBox;
+	JCheckBox enableWireFrameCheckBox;
 	
 	JSlider alphaSlider = new JSlider(JSlider.HORIZONTAL,
 			ALPHA_MIN, ALPHA_MAX, ALPHA_MAX);
-	
 	JSlider redSlider = new JSlider(JSlider.HORIZONTAL,
 			ALPHA_MIN, ALPHA_MAX, ALPHA_MIN);
-	
 	JSlider greenSlider = new JSlider(JSlider.HORIZONTAL,
 			ALPHA_MIN, ALPHA_MAX, ALPHA_MIN);
-	
 	JSlider blueSlider = new JSlider(JSlider.HORIZONTAL,
 			ALPHA_MIN, ALPHA_MAX, ALPHA_MIN);
 
@@ -908,6 +906,10 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 		}
 		else if ( source == enableCompositingCheckBox ) {
 			sceneViewer.enableCompositing = ! sceneViewer.enableCompositing;
+			sceneViewer.repaint();
+		}
+		else if ( source == enableWireFrameCheckBox ) {
+			sceneViewer.enableWireFrame = ! sceneViewer.enableWireFrame;
 			sceneViewer.repaint();
 		}
 	}
@@ -1006,6 +1008,11 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 		enableCompositingCheckBox.addActionListener(this);
 		toolPanel.add( enableCompositingCheckBox );
 		
+		enableWireFrameCheckBox = new JCheckBox("Enable WireFrame", sceneViewer.enableWireFrame);
+		enableWireFrameCheckBox.setAlignmentX( Component.LEFT_ALIGNMENT );
+		enableWireFrameCheckBox.addActionListener(this);
+		toolPanel.add(enableWireFrameCheckBox);
+		
 		alphaSlider.setAlignmentX( Component.LEFT_ALIGNMENT );
 		alphaSlider.addChangeListener(this);
 		Hashtable alphaSliderLabelTable = new Hashtable();
@@ -1065,19 +1072,19 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		JSlider source = (JSlider)e.getSource();
-		float slider_value = (int)source.getValue()/100.0f;
-		if(source == alphaSlider){
-			sceneViewer.setAlphaOfSelection(slider_value);
+		Object source = e.getSource();
+		
+		if( (JSlider) source == alphaSlider){
+			sceneViewer.setAlphaOfSelection((int)((JSlider) source).getValue()/100.0f);
 		}
-		else if ( source == redSlider ) {
-			sceneViewer.setRedOfSelection(slider_value);
+		else if ( (JSlider) source == redSlider ) {
+			sceneViewer.setRedOfSelection((int)((JSlider) source).getValue()/100.0f);
 		}
-		else if ( source == greenSlider ) {
-			sceneViewer.setGreenOfSelection(slider_value);
+		else if ( (JSlider) source == greenSlider ) {
+			sceneViewer.setGreenOfSelection((int)((JSlider) source).getValue()/100.0f);
 		}
-		else if ( source == blueSlider ) {
-			sceneViewer.setBlueOfSelection(slider_value);
+		else if ( (JSlider) source == blueSlider ) {
+			sceneViewer.setBlueOfSelection((int)((JSlider) source).getValue()/100.0f);
 		}
         sceneViewer.repaint();
 	}
