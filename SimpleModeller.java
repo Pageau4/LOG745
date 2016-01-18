@@ -150,6 +150,11 @@ class Scene {
 		if ( 0 <= index && index < coloredBoxes.size() )
 			coloredBoxes.elementAt(index).isSelected = state;
 	}
+	public void unselectAllBoxes() {
+		for (int index = 0; index < coloredBoxes.size(); index++ ) {
+			coloredBoxes.elementAt(index).isSelected = false;
+		}
+	}
 	public void toggleSelectionStateOfBox( int index ) {
 		if ( 0 <= index && index < coloredBoxes.size() ) {
 			ColoredBox cb = coloredBoxes.elementAt(index);
@@ -205,6 +210,21 @@ class Scene {
 			isBoundingBoxOfSceneDirty = true;
 		}
 	}
+	
+	public void translateBoxes( Vector3D translation ) {
+		for (int index = 0; index < coloredBoxes.size(); index++ ) {
+			if(coloredBoxes.get(index).isSelected) {
+				ColoredBox cb = coloredBoxes.elementAt(index);
+				AlignedBox3D oldBox = cb.box;
+				cb.box = new AlignedBox3D(
+					Point3D.sum( oldBox.getMin(), translation ),
+					Point3D.sum( oldBox.getMax(), translation )
+				);
+				isBoundingBoxOfSceneDirty = true;
+			}
+		}
+	}
+
 
 	public void resizeBox(
 		int indexOfBox, int indexOfCornerToResize, Vector3D translation
@@ -233,12 +253,29 @@ class Scene {
 		}
 	}
 
+	public void deleteSelectedBoxes() {
+		for(int index = coloredBoxes.size() - 1; index >= 0; index-- ) {
+			if(coloredBoxes.get(index).isSelected) {
+				coloredBoxes.removeElementAt( index );
+				isBoundingBoxOfSceneDirty = true;
+			}
+		}
+	}
 
 	public void deleteAllBoxes() {
 		coloredBoxes.removeAllElements();
 		isBoundingBoxOfSceneDirty = true;
 	}
 
+	public int numOfSelectedShape() {
+		int num = 0;
+		for(int i = 0; i < coloredBoxes.size(); i++) {
+			if(coloredBoxes.get(i).isSelected) {
+				num++;
+			}
+		}
+		return num;
+	}
 
 	static public void drawBox(
 		GL gl,
@@ -400,7 +437,7 @@ class Scene {
 		int indexOfHilitedBox, // -1 for none
 		Vector3D normalAtSelectedPoint,
 		boolean useAlphaBlending,
-		boolean wireFrameValue
+		boolean useWireFrame
 	) {
 		if ( useAlphaBlending ) {
 			gl.glDisable(GL.GL_DEPTH_TEST);
@@ -414,7 +451,7 @@ class Scene {
 				gl.glColor4f( cb.r, cb.g, cb.b, cb.a );
 			else
 				gl.glColor3f( cb.r, cb.g, cb.b );
-			drawBox( gl, cb.box, false, wireFrameValue, false, normalAtSelectedPoint );
+			drawBox( gl, cb.box, false, useWireFrame, false, normalAtSelectedPoint );
 		}
 		if ( useAlphaBlending ) {
 			gl.glDisable( GL.GL_BLEND );
@@ -569,10 +606,26 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 		}
 	}
 	
+	public int getAlphaOfSelection( ) {
+		int alpha = 0;
+		if ( indexOfSelectedBox >= 0 ) {
+			alpha = (int) (scene.coloredBoxes.elementAt(indexOfSelectedBox).a*100.0f);
+		}
+		return alpha;
+	}
+	
 	public void setRedOfSelection( float r ) {
 		if ( indexOfSelectedBox >= 0 ) {
 			scene.setRedOfBox( indexOfSelectedBox, r );
 		}
+	}
+	
+	public int getRedOfSelection( ) {
+		int red = 0;
+		if ( indexOfSelectedBox >= 0 ) {
+			red = (int) (scene.coloredBoxes.elementAt(indexOfSelectedBox).r*100.0f);
+		}
+		return red;
 	}
 	
 	public void setGreenOfSelection( float g ) {
@@ -581,15 +634,31 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 		}
 	}
 	
+	public int getGreenOfSelection( ) {
+		int green = 0;
+		if ( indexOfSelectedBox >= 0 ) {
+			green = (int) (scene.coloredBoxes.elementAt(indexOfSelectedBox).g*100.0f);
+		}
+		return green;
+	}
+	
 	public void setBlueOfSelection( float b ) {
 		if ( indexOfSelectedBox >= 0 ) {
 			scene.setBlueOfBox( indexOfSelectedBox, b );
 		}
 	}
+	
+	public int getBlueOfSelection( ) {
+		int blue = 0;
+		if ( indexOfSelectedBox >= 0 ) {
+			blue = (int) (scene.coloredBoxes.elementAt(indexOfSelectedBox).b*100.0f);
+		}
+		return blue;
+	}
 
 	public void deleteSelection() {
 		if ( indexOfSelectedBox >= 0 ) {
-			scene.deleteBox( indexOfSelectedBox );
+			scene.deleteSelectedBoxes();
 			indexOfSelectedBox = -1;
 			indexOfHilitedBox = -1;
 		}
@@ -727,6 +796,10 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 		}
 
 		updateHiliting();
+		
+		if(scene.numOfSelectedShape() > 1) {
+			indexOfSelectedBox = -1;
+		}
 
 		if ( SwingUtilities.isLeftMouseButton(e) && !e.isControlDown() ) {
 			if ( indexOfSelectedBox >= 0 )
@@ -737,6 +810,20 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 			normalAtSelectedPoint.copy( normalAtHilitedPoint );
 			if ( indexOfSelectedBox >= 0 ) {
 				scene.setSelectionStateOfBox( indexOfSelectedBox, true );
+			} else {
+				scene.unselectAllBoxes();
+			}
+			repaint();
+		}
+		
+		if ( SwingUtilities.isLeftMouseButton(e) && e.isControlDown() ) {
+
+			indexOfSelectedBox = indexOfHilitedBox;
+			selectedPoint.copy( hilitedPoint );
+			normalAtSelectedPoint.copy( normalAtHilitedPoint );
+			if ( indexOfSelectedBox >= 0 ) {
+				scene.toggleSelectionStateOfBox( indexOfSelectedBox );
+				indexOfSelectedBox = -1;
 			}
 			repaint();
 		}
@@ -834,7 +921,7 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 		}
 		else if (
 			SwingUtilities.isLeftMouseButton(e) && !e.isControlDown()
-			&& indexOfSelectedBox >= 0
+			&& scene.numOfSelectedShape() > 0
 		) {
 			if ( !e.isShiftDown() ) {
 				// translate a box
@@ -849,7 +936,7 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 					&& plane.intersects( ray2, intersection2, true )
 				) {
 					Vector3D translation = Point3D.diff( intersection2, intersection1 );
-					scene.translateBox( indexOfSelectedBox, translation );
+					scene.translateBoxes( translation );
 					repaint();
 				}
 			}
@@ -905,7 +992,6 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 	JCheckBox displayBoundingBoxCheckBox;
 	JCheckBox enableCompositingCheckBox;
 	JCheckBox enableWireFrameCheckBox;
-	
 	JSlider alphaSlider = new JSlider(JSlider.HORIZONTAL,
 			ALPHA_MIN, ALPHA_MAX, ALPHA_MAX);
 	JSlider redSlider = new JSlider(JSlider.HORIZONTAL,
@@ -954,6 +1040,9 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 		else if ( source == createBoxButton ) {
 			sceneViewer.createNewBox();
 			sceneViewer.repaint();
+			redSlider.setValue(sceneViewer.getRedOfSelection( ));
+			greenSlider.setValue(sceneViewer.getGreenOfSelection( ));
+			blueSlider.setValue(sceneViewer.getBlueOfSelection( ));
 		}
 		else if ( source == deleteSelectionButton ) {
 			sceneViewer.deleteSelection();
@@ -982,6 +1071,10 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 		else if ( source == enableCompositingCheckBox ) {
 			sceneViewer.enableCompositing = ! sceneViewer.enableCompositing;
 			sceneViewer.repaint();
+			if(sceneViewer.indexOfSelectedBox >= 0){
+				alphaSlider.setValue(sceneViewer.getAlphaOfSelection( ));
+			}
+			alphaSlider.setEnabled(sceneViewer.enableCompositing);
 		}
 		else if ( source == enableWireFrameCheckBox ) {
 			sceneViewer.enableWireFrame = ! sceneViewer.enableWireFrame;
@@ -1083,11 +1176,12 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 		enableCompositingCheckBox.addActionListener(this);
 		toolPanel.add( enableCompositingCheckBox );
 		
-		enableWireFrameCheckBox = new JCheckBox("Enable WireFrame", sceneViewer.enableWireFrame);
+		enableWireFrameCheckBox = new JCheckBox("Draw Wireframe Boxes", sceneViewer.enableWireFrame);
 		enableWireFrameCheckBox.setAlignmentX( Component.LEFT_ALIGNMENT );
 		enableWireFrameCheckBox.addActionListener(this);
 		toolPanel.add(enableWireFrameCheckBox);
 		
+		alphaSlider.setEnabled(false);
 		alphaSlider.setAlignmentX( Component.LEFT_ALIGNMENT );
 		alphaSlider.addChangeListener(this);
 		Hashtable alphaSliderLabelTable = new Hashtable();
@@ -1147,19 +1241,19 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		Object source = e.getSource();
-		
-		if( (JSlider) source == alphaSlider){
-			sceneViewer.setAlphaOfSelection((int)((JSlider) source).getValue()/100.0f);
+		JSlider source = (JSlider)e.getSource();
+		float slider_value = (int)source.getValue()/100.0f;
+		if(source == alphaSlider){
+			sceneViewer.setAlphaOfSelection(slider_value);
 		}
-		else if ( (JSlider) source == redSlider ) {
-			sceneViewer.setRedOfSelection((int)((JSlider) source).getValue()/100.0f);
+		else if ( source == redSlider ) {
+			sceneViewer.setRedOfSelection(slider_value);
 		}
-		else if ( (JSlider) source == greenSlider ) {
-			sceneViewer.setGreenOfSelection((int)((JSlider) source).getValue()/100.0f);
+		else if ( source == greenSlider ) {
+			sceneViewer.setGreenOfSelection(slider_value);
 		}
-		else if ( (JSlider) source == blueSlider ) {
-			sceneViewer.setBlueOfSelection((int)((JSlider) source).getValue()/100.0f);
+		else if ( source == blueSlider ) {
+			sceneViewer.setBlueOfSelection(slider_value);
 		}
         sceneViewer.repaint();
 	}
