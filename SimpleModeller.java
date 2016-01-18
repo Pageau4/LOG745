@@ -365,64 +365,75 @@ class Scene {
 		else {
 			// Ajout des carrés d'une boîte
 			gl.glBegin( GL.GL_QUAD_STRIP );
+				gl.glVertex3fv( box.getCorner( 0 ).get(), 0 );
+				gl.glVertex3fv( box.getCorner( 1 ).get(), 0 );
+				gl.glVertex3fv( box.getCorner( 4 ).get(), 0 );
+				
 			// Bottom
 			if (bottomSelected) {
 				gl.glColor3f( 255, 255, 255 );
 			}
-				gl.glVertex3fv( box.getCorner( 0 ).get(), 0 );
-				gl.glVertex3fv( box.getCorner( 1 ).get(), 0 );
-				gl.glVertex3fv( box.getCorner( 4 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 5 ).get(), 0 );
 			if (bottomSelected) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
 			}
+			
+				gl.glVertex3fv( box.getCorner( 6 ).get(), 0 );
+				
 			// Front
 			if (frontSelected) {
 				gl.glColor3f( 255, 255, 255 );
 			}
-				gl.glVertex3fv( box.getCorner( 6 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 7 ).get(), 0 );
 			if (frontSelected) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
 			}
+			
+				gl.glVertex3fv( box.getCorner( 2 ).get(), 0 );
+			
 			// Top
 			if (topSelected) {
 				gl.glColor3f( 255, 255, 255 );
 			}
-				gl.glVertex3fv( box.getCorner( 2 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 3 ).get(), 0 );
 			if (topSelected) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
 			}
+			
+				gl.glVertex3fv( box.getCorner( 0 ).get(), 0 );
+			
 			// Back
 			if (backSelected) {
 				gl.glColor3f( 255, 255, 255 );
 			}
-				gl.glVertex3fv( box.getCorner( 0 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 1 ).get(), 0 );
 			if (backSelected) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
 			}				
 			gl.glEnd();
 			gl.glBegin( GL.GL_QUADS );
+			
+				gl.glVertex3fv( box.getCorner( 1 ).get(), 0 );
+				gl.glVertex3fv( box.getCorner( 3 ).get(), 0 );
+				gl.glVertex3fv( box.getCorner( 7 ).get(), 0 );
+				
 			// Right
 			if (rightSelected) {
 				gl.glColor3f( 255, 255, 255 );
 			}
-				gl.glVertex3fv( box.getCorner( 1 ).get(), 0 );
-				gl.glVertex3fv( box.getCorner( 3 ).get(), 0 );
-				gl.glVertex3fv( box.getCorner( 7 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 5 ).get(), 0 );
 			if (rightSelected) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
 			}
+			
+				gl.glVertex3fv( box.getCorner( 0 ).get(), 0 );
+				gl.glVertex3fv( box.getCorner( 4 ).get(), 0 );
+				gl.glVertex3fv( box.getCorner( 6 ).get(), 0 );
+				
 			// Left
 			if (leftSelected) {
 				gl.glColor3f( 255, 255, 255 );
 			}
-				gl.glVertex3fv( box.getCorner( 0 ).get(), 0 );
-				gl.glVertex3fv( box.getCorner( 4 ).get(), 0 );
-				gl.glVertex3fv( box.getCorner( 6 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 2 ).get(), 0 );
 			if (leftSelected) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
