@@ -451,7 +451,11 @@ class Scene {
 				gl.glColor4f( cb.r, cb.g, cb.b, cb.a );
 			else
 				gl.glColor3f( cb.r, cb.g, cb.b );
-			drawBox( gl, cb.box, false, useWireFrame, false, normalAtSelectedPoint );
+			if (cb.isSelected) {
+				drawBox( gl, cb.box, false, useWireFrame, false, normalAtSelectedPoint );
+			} else {
+				drawBox( gl, cb.box, false, useWireFrame, false, null );
+			}
 		}
 		if ( useAlphaBlending ) {
 			gl.glDisable( GL.GL_BLEND );
