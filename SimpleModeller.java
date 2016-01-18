@@ -1,5 +1,6 @@
 
 import java.lang.Math;
+import java.nio.FloatBuffer;
 import java.util.Hashtable;
 import java.util.Vector;
 import java.awt.Container;
@@ -35,6 +36,7 @@ import javax.media.opengl.GLAutoDrawable;
 // import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 
+import com.sun.opengl.util.BufferUtil;
 import com.sun.opengl.util.GLUT;
 
 
@@ -243,8 +245,36 @@ class Scene {
 		AlignedBox3D box,
 		boolean expand,
 		boolean drawAsWireframe,
-		boolean cornersOnly
+		boolean cornersOnly,
+		Vector3D normalAtSelectedPoint
 	) {
+		// F2
+		FloatBuffer currentColor = BufferUtil.newFloatBuffer(3);
+		currentColor.rewind();
+		gl.glGetFloatv(GL.GL_CURRENT_COLOR, currentColor);
+		boolean bottomSelected = false,
+				frontSelected = false,
+				topSelected = false,
+				backSelected = false,
+				rightSelected = false,
+				leftSelected = false;
+		
+		if (normalAtSelectedPoint != null) {
+			if (normalAtSelectedPoint.y() < 0) {
+				bottomSelected = true;
+			} else if (normalAtSelectedPoint.z() > 0) {
+				frontSelected = true;
+			} else if (normalAtSelectedPoint.y() > 0) {
+				topSelected = true;
+			} else if (normalAtSelectedPoint.z() < 0) {
+				backSelected = true;
+			} else if (normalAtSelectedPoint.x() > 0) {
+				rightSelected = true;
+			} else if (normalAtSelectedPoint.x() < 0) {
+				leftSelected = true;
+			}
+		}		
+		
 		if ( expand ) {
 			float diagonal = box.getDiagonal().length();
 			diagonal /= 20;
@@ -268,6 +298,9 @@ class Scene {
 					}
 				}
 				gl.glEnd();
+				if (bottomSelected) {
+					System.out.println("Colorint Bottom");
+				}
 			}
 			else {
 				gl.glBegin( GL.GL_LINE_STRIP );
@@ -293,29 +326,70 @@ class Scene {
 			}
 		}
 		else {
+			// Ajout des carrés d'une boîte
 			gl.glBegin( GL.GL_QUAD_STRIP );
+			// Bottom
+			if (bottomSelected) {
+				gl.glColor3f( 255, 255, 255 );
+			}
 				gl.glVertex3fv( box.getCorner( 0 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 1 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 4 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 5 ).get(), 0 );
+			if (bottomSelected) {
+				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
+			}
+			// Front
+			if (frontSelected) {
+				gl.glColor3f( 255, 255, 255 );
+			}
 				gl.glVertex3fv( box.getCorner( 6 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 7 ).get(), 0 );
+			if (frontSelected) {
+				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
+			}
+			// Top
+			if (topSelected) {
+				gl.glColor3f( 255, 255, 255 );
+			}
 				gl.glVertex3fv( box.getCorner( 2 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 3 ).get(), 0 );
+			if (topSelected) {
+				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
+			}
+			// Back
+			if (backSelected) {
+				gl.glColor3f( 255, 255, 255 );
+			}
 				gl.glVertex3fv( box.getCorner( 0 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 1 ).get(), 0 );
+			if (backSelected) {
+				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
+			}				
 			gl.glEnd();
-
 			gl.glBegin( GL.GL_QUADS );
+			// Right
+			if (rightSelected) {
+				gl.glColor3f( 255, 255, 255 );
+			}
 				gl.glVertex3fv( box.getCorner( 1 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 3 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 7 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 5 ).get(), 0 );
-
+			if (rightSelected) {
+				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
+			}
+			// Left
+			if (leftSelected) {
+				gl.glColor3f( 255, 255, 255 );
+			}
 				gl.glVertex3fv( box.getCorner( 0 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 4 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 6 ).get(), 0 );
 				gl.glVertex3fv( box.getCorner( 2 ).get(), 0 );
+			if (leftSelected) {
+				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
+			}
 			gl.glEnd();
 		}
 	}
@@ -324,6 +398,7 @@ class Scene {
 	public void drawScene(
 		GL gl,
 		int indexOfHilitedBox, // -1 for none
+		Vector3D normalAtSelectedPoint,
 		boolean useAlphaBlending,
 		boolean wireFrameValue
 	) {
@@ -339,7 +414,7 @@ class Scene {
 				gl.glColor4f( cb.r, cb.g, cb.b, cb.a );
 			else
 				gl.glColor3f( cb.r, cb.g, cb.b );
-			drawBox( gl, cb.box, false, false, false );
+			drawBox( gl, cb.box, false, wireFrameValue, false, normalAtSelectedPoint );
 		}
 		if ( useAlphaBlending ) {
 			gl.glDisable( GL.GL_BLEND );
@@ -355,14 +430,14 @@ class Scene {
 			else if ( indexOfHilitedBox == i )
 				gl.glColor3f( 0, 1, 0 );
 			else continue;
-			drawBox( gl, cb.box, true, wireFrameValue, true );
+			drawBox( gl, cb.box, true, true, true, null );
 		}
 	}
 
 	public void drawBoundingBoxOfScene( GL gl ) {
 		AlignedBox3D box = getBoundingBoxOfScene();
 		if ( ! box.isEmpty() )
-			drawBox( gl, box, false, true, false );
+			drawBox( gl, box, false, true, false, null );
 	}
 }
 
@@ -395,7 +470,7 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	public boolean displayCameraTarget = false;
 	public boolean displayBoundingBox = false;
 	public boolean enableCompositing = false;
-	public boolean enableWireFrame = true;
+	public boolean enableWireFrame = false;
 
 	int mouse_x, mouse_y, old_mouse_x, old_mouse_y;
 	
@@ -580,7 +655,7 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 		gl.glDisable( GL.GL_LIGHTING );
 		gl.glShadeModel( GL.GL_FLAT );
 
-		scene.drawScene( gl, indexOfHilitedBox, enableCompositing, enableWireFrame );
+		scene.drawScene( gl, indexOfHilitedBox, normalAtSelectedPoint, enableCompositing, enableWireFrame );
 
 		if ( displayWorldAxes ) {
 			gl.glBegin( GL.GL_LINES );
