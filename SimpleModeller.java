@@ -148,6 +148,11 @@ class Scene {
 		if ( 0 <= index && index < coloredBoxes.size() )
 			coloredBoxes.elementAt(index).isSelected = state;
 	}
+	public void unselectAllBoxes() {
+		for (int index = 0; index < coloredBoxes.size(); index++ ) {
+			coloredBoxes.elementAt(index).isSelected = false;
+		}
+	}
 	public void toggleSelectionStateOfBox( int index ) {
 		if ( 0 <= index && index < coloredBoxes.size() ) {
 			ColoredBox cb = coloredBoxes.elementAt(index);
@@ -203,6 +208,21 @@ class Scene {
 			isBoundingBoxOfSceneDirty = true;
 		}
 	}
+	
+	public void translateBoxes( Vector3D translation ) {
+		for (int index = 0; index < coloredBoxes.size(); index++ ) {
+			if(coloredBoxes.get(index).isSelected) {
+				ColoredBox cb = coloredBoxes.elementAt(index);
+				AlignedBox3D oldBox = cb.box;
+				cb.box = new AlignedBox3D(
+					Point3D.sum( oldBox.getMin(), translation ),
+					Point3D.sum( oldBox.getMax(), translation )
+				);
+				isBoundingBoxOfSceneDirty = true;
+			}
+		}
+	}
+
 
 	public void resizeBox(
 		int indexOfBox, int indexOfCornerToResize, Vector3D translation
@@ -231,12 +251,29 @@ class Scene {
 		}
 	}
 
+	public void deleteSelectedBoxes() {
+		for(int index = coloredBoxes.size() - 1; index >= 0; index-- ) {
+			if(coloredBoxes.get(index).isSelected) {
+				coloredBoxes.removeElementAt( index );
+				isBoundingBoxOfSceneDirty = true;
+			}
+		}
+	}
 
 	public void deleteAllBoxes() {
 		coloredBoxes.removeAllElements();
 		isBoundingBoxOfSceneDirty = true;
 	}
 
+	public int numOfSelectedShape() {
+		int num = 0;
+		for(int i = 0; i < coloredBoxes.size(); i++) {
+			if(coloredBoxes.get(i).isSelected) {
+				num++;
+			}
+		}
+		return num;
+	}
 
 	static public void drawBox(
 		GL gl,
@@ -514,7 +551,7 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 
 	public void deleteSelection() {
 		if ( indexOfSelectedBox >= 0 ) {
-			scene.deleteBox( indexOfSelectedBox );
+			scene.deleteSelectedBoxes();
 			indexOfSelectedBox = -1;
 			indexOfHilitedBox = -1;
 		}
@@ -652,6 +689,10 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 		}
 
 		updateHiliting();
+		
+		if(scene.numOfSelectedShape() > 1) {
+			indexOfSelectedBox = -1;
+		}
 
 		if ( SwingUtilities.isLeftMouseButton(e) && !e.isControlDown() ) {
 			if ( indexOfSelectedBox >= 0 )
@@ -662,6 +703,20 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 			normalAtSelectedPoint.copy( normalAtHilitedPoint );
 			if ( indexOfSelectedBox >= 0 ) {
 				scene.setSelectionStateOfBox( indexOfSelectedBox, true );
+			} else {
+				scene.unselectAllBoxes();
+			}
+			repaint();
+		}
+		
+		if ( SwingUtilities.isLeftMouseButton(e) && e.isControlDown() ) {
+
+			indexOfSelectedBox = indexOfHilitedBox;
+			selectedPoint.copy( hilitedPoint );
+			normalAtSelectedPoint.copy( normalAtHilitedPoint );
+			if ( indexOfSelectedBox >= 0 ) {
+				scene.toggleSelectionStateOfBox( indexOfSelectedBox );
+				indexOfSelectedBox = -1;
 			}
 			repaint();
 		}
@@ -759,7 +814,7 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 		}
 		else if (
 			SwingUtilities.isLeftMouseButton(e) && !e.isControlDown()
-			&& indexOfSelectedBox >= 0
+			&& scene.numOfSelectedShape() > 0
 		) {
 			if ( !e.isShiftDown() ) {
 				// translate a box
@@ -774,7 +829,7 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 					&& plane.intersects( ray2, intersection2, true )
 				) {
 					Vector3D translation = Point3D.diff( intersection2, intersection1 );
-					scene.translateBox( indexOfSelectedBox, translation );
+					scene.translateBoxes( translation );
 					repaint();
 				}
 			}
