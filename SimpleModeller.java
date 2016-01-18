@@ -289,26 +289,21 @@ class Scene {
 		FloatBuffer currentColor = BufferUtil.newFloatBuffer(3);
 		currentColor.rewind();
 		gl.glGetFloatv(GL.GL_CURRENT_COLOR, currentColor);
-		boolean bottomSelected = false,
-				frontSelected = false,
-				topSelected = false,
-				backSelected = false,
-				rightSelected = false,
-				leftSelected = false;
+		String faceSelected = "";
 		
 		if (normalAtSelectedPoint != null) {
 			if (normalAtSelectedPoint.y() < 0) {
-				bottomSelected = true;
+				faceSelected = "Bottom";
 			} else if (normalAtSelectedPoint.z() > 0) {
-				frontSelected = true;
+				faceSelected = "Front";
 			} else if (normalAtSelectedPoint.y() > 0) {
-				topSelected = true;
+				faceSelected = "Top";
 			} else if (normalAtSelectedPoint.z() < 0) {
-				backSelected = true;
+				faceSelected = "Back";
 			} else if (normalAtSelectedPoint.x() > 0) {
-				rightSelected = true;
+				faceSelected = "Right";
 			} else if (normalAtSelectedPoint.x() < 0) {
-				leftSelected = true;
+				faceSelected = "Left";
 			}
 		}		
 		
@@ -335,9 +330,6 @@ class Scene {
 					}
 				}
 				gl.glEnd();
-				if (bottomSelected) {
-					System.out.println("Colorint Bottom");
-				}
 			}
 			else {
 				gl.glBegin( GL.GL_LINE_STRIP );
@@ -370,44 +362,44 @@ class Scene {
 				gl.glVertex3fv( box.getCorner( 4 ).get(), 0 );
 				
 			// Bottom
-			if (bottomSelected) {
+			if (faceSelected.equals("Bottom")) {
 				gl.glColor3f( 255, 255, 255 );
 			}
 				gl.glVertex3fv( box.getCorner( 5 ).get(), 0 );
-			if (bottomSelected) {
+			if (faceSelected.equals("Bottom")) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
 			}
 			
 				gl.glVertex3fv( box.getCorner( 6 ).get(), 0 );
 				
 			// Front
-			if (frontSelected) {
+			if (faceSelected.equals("Front")) {
 				gl.glColor3f( 255, 255, 255 );
 			}
 				gl.glVertex3fv( box.getCorner( 7 ).get(), 0 );
-			if (frontSelected) {
+			if (faceSelected.equals("Front")) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
 			}
 			
 				gl.glVertex3fv( box.getCorner( 2 ).get(), 0 );
 			
 			// Top
-			if (topSelected) {
+			if (faceSelected.equals("Top")) {
 				gl.glColor3f( 255, 255, 255 );
 			}
 				gl.glVertex3fv( box.getCorner( 3 ).get(), 0 );
-			if (topSelected) {
+			if (faceSelected.equals("Top")) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
 			}
 			
 				gl.glVertex3fv( box.getCorner( 0 ).get(), 0 );
 			
 			// Back
-			if (backSelected) {
+			if (faceSelected.equals("Back")) {
 				gl.glColor3f( 255, 255, 255 );
 			}
 				gl.glVertex3fv( box.getCorner( 1 ).get(), 0 );
-			if (backSelected) {
+			if (faceSelected.equals("Back")) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
 			}				
 			gl.glEnd();
@@ -418,11 +410,11 @@ class Scene {
 				gl.glVertex3fv( box.getCorner( 7 ).get(), 0 );
 				
 			// Right
-			if (rightSelected) {
+			if (faceSelected.equals("Right")) {
 				gl.glColor3f( 255, 255, 255 );
 			}
 				gl.glVertex3fv( box.getCorner( 5 ).get(), 0 );
-			if (rightSelected) {
+			if (faceSelected.equals("Right")) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
 			}
 			
@@ -431,11 +423,11 @@ class Scene {
 				gl.glVertex3fv( box.getCorner( 6 ).get(), 0 );
 				
 			// Left
-			if (leftSelected) {
+			if (faceSelected.equals("Left")) {
 				gl.glColor3f( 255, 255, 255 );
 			}
 				gl.glVertex3fv( box.getCorner( 2 ).get(), 0 );
-			if (leftSelected) {
+			if (faceSelected.equals("Left")) {
 				gl.glColor3f(currentColor.get(0), currentColor.get(1), currentColor.get(2));
 			}
 			gl.glEnd();
