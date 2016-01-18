@@ -325,7 +325,7 @@ class Scene {
 		GL gl,
 		int indexOfHilitedBox, // -1 for none
 		boolean useAlphaBlending,
-		boolean wireFrameValue
+		boolean useWireFrame
 	) {
 		if ( useAlphaBlending ) {
 			gl.glDisable(GL.GL_DEPTH_TEST);
@@ -339,7 +339,7 @@ class Scene {
 				gl.glColor4f( cb.r, cb.g, cb.b, cb.a );
 			else
 				gl.glColor3f( cb.r, cb.g, cb.b );
-			drawBox( gl, cb.box, false, false, false );
+			drawBox( gl, cb.box, false, useWireFrame, false );
 		}
 		if ( useAlphaBlending ) {
 			gl.glDisable( GL.GL_BLEND );
@@ -355,7 +355,7 @@ class Scene {
 			else if ( indexOfHilitedBox == i )
 				gl.glColor3f( 0, 1, 0 );
 			else continue;
-			drawBox( gl, cb.box, true, wireFrameValue, true );
+			drawBox( gl, cb.box, true, true, true );
 		}
 	}
 
@@ -395,7 +395,7 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	public boolean displayCameraTarget = false;
 	public boolean displayBoundingBox = false;
 	public boolean enableCompositing = false;
-	public boolean enableWireFrame = true;
+	public boolean enableWireFrame = false;
 
 	int mouse_x, mouse_y, old_mouse_x, old_mouse_y;
 	
@@ -1008,7 +1008,7 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 		enableCompositingCheckBox.addActionListener(this);
 		toolPanel.add( enableCompositingCheckBox );
 		
-		enableWireFrameCheckBox = new JCheckBox("Enable WireFrame", sceneViewer.enableWireFrame);
+		enableWireFrameCheckBox = new JCheckBox("Draw Wireframe Boxes", sceneViewer.enableWireFrame);
 		enableWireFrameCheckBox.setAlignmentX( Component.LEFT_ALIGNMENT );
 		enableWireFrameCheckBox.addActionListener(this);
 		toolPanel.add(enableWireFrameCheckBox);
