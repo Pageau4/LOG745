@@ -1185,6 +1185,8 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 		enableWireFrameCheckBox.addActionListener(this);
 		toolPanel.add(enableWireFrameCheckBox);
 		
+		JLabel alphaSliderLabel = new JLabel("Transparence");
+		toolPanel.add(alphaSliderLabel);
 		alphaSlider.setEnabled(false);
 		alphaSlider.setAlignmentX( Component.LEFT_ALIGNMENT );
 		alphaSlider.addChangeListener(this);
@@ -1196,6 +1198,8 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 		alphaSlider.setPaintLabels(true);
 		toolPanel.add( alphaSlider );
 		
+		JLabel redSliderLabel = new JLabel("Rouge");
+		toolPanel.add(redSliderLabel);
 		redSlider.setAlignmentX( Component.LEFT_ALIGNMENT );
 		redSlider.addChangeListener(this);
 		Hashtable redSliderLabelTable = new Hashtable();
@@ -1206,6 +1210,8 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 		redSlider.setPaintLabels(true);
 		toolPanel.add( redSlider );
 		
+		JLabel greenSliderLabel = new JLabel("Vert");
+		toolPanel.add(greenSliderLabel);
 		greenSlider.setAlignmentX( Component.LEFT_ALIGNMENT );
 		greenSlider.addChangeListener(this);
 		Hashtable greenSliderLabelTable = new Hashtable();
@@ -1216,6 +1222,8 @@ public class SimpleModeller implements ActionListener, ChangeListener {
 		greenSlider.setPaintLabels(true);
 		toolPanel.add( greenSlider );
 		
+		JLabel blueSliderLabel = new JLabel("Blue");
+		toolPanel.add(blueSliderLabel);
 		blueSlider.setAlignmentX( Component.LEFT_ALIGNMENT );
 		blueSlider.addChangeListener(this);
 		Hashtable blueSliderLabelTable = new Hashtable();
