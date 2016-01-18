@@ -171,31 +171,39 @@ class Scene {
 		}
 	}
 	
-	public void setAlphaOfBox( int index, float a ) {
-		if ( 0 <= index && index < coloredBoxes.size() ) {
-			ColoredBox cb = coloredBoxes.elementAt(index);
-			cb.a = a;
+	public void setAlphaOfBox( float a ) {
+		for(int index = 0; index < coloredBoxes.size(); index++) {
+			if(coloredBoxes.get(index).isSelected) {
+				ColoredBox cb = coloredBoxes.elementAt(index);
+				cb.a = a;
+			}
 		}
 	}
 	
-	public void setRedOfBox( int index, float r ) {
-		if ( 0 <= index && index < coloredBoxes.size() ) {
-			ColoredBox cb = coloredBoxes.elementAt(index);
-			cb.r = r;
+	public void setRedOfBox( float r ) {
+		for(int index = 0; index < coloredBoxes.size(); index++) {
+			if(coloredBoxes.get(index).isSelected) {
+				ColoredBox cb = coloredBoxes.elementAt(index);
+				cb.r = r;
+			}
 		}
 	}
 	
-	public void setGreenOfBox( int index, float g ) {
-		if ( 0 <= index && index < coloredBoxes.size() ) {
-			ColoredBox cb = coloredBoxes.elementAt(index);
-			cb.g = g;
+	public void setGreenOfBox( float g ) {
+		for(int index = 0; index < coloredBoxes.size(); index++) {
+			if(coloredBoxes.get(index).isSelected) {
+				ColoredBox cb = coloredBoxes.elementAt(index);
+				cb.g = g;
+			}
 		}
 	}
 	
-	public void setBlueOfBox( int index, float b ) {
-		if ( 0 <= index && index < coloredBoxes.size() ) {
-			ColoredBox cb = coloredBoxes.elementAt(index);
-			cb.b = b;
+	public void setBlueOfBox( float b ) {
+		for(int index = 0; index < coloredBoxes.size(); index++) {
+			if(coloredBoxes.get(index).isSelected) {
+				ColoredBox cb = coloredBoxes.elementAt(index);
+				cb.b = b;
+			}
 		}
 	}
 
@@ -608,8 +616,8 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	}
 	
 	public void setAlphaOfSelection( float a ) {
-		if ( indexOfSelectedBox >= 0 ) {
-			scene.setAlphaOfBox( indexOfSelectedBox, a );
+		if ( scene.numOfSelectedShape() > 0 ) {
+			scene.setAlphaOfBox( a );
 		}
 	}
 	
@@ -622,8 +630,8 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	}
 	
 	public void setRedOfSelection( float r ) {
-		if ( indexOfSelectedBox >= 0 ) {
-			scene.setRedOfBox( indexOfSelectedBox, r );
+		if ( scene.numOfSelectedShape() > 0 ) {
+			scene.setRedOfBox( r );
 		}
 	}
 	
@@ -636,8 +644,8 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	}
 	
 	public void setGreenOfSelection( float g ) {
-		if ( indexOfSelectedBox >= 0 ) {
-			scene.setGreenOfBox( indexOfSelectedBox, g );
+		if ( scene.numOfSelectedShape() > 0 ) {
+			scene.setGreenOfBox( g );
 		}
 	}
 	
@@ -650,8 +658,8 @@ class SceneViewer extends GLCanvas implements MouseListener, MouseMotionListener
 	}
 	
 	public void setBlueOfSelection( float b ) {
-		if ( indexOfSelectedBox >= 0 ) {
-			scene.setBlueOfBox( indexOfSelectedBox, b );
+		if ( scene.numOfSelectedShape() > 0 ) {
+			scene.setBlueOfBox( b );
 		}
 	}
 	
